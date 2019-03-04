@@ -4,7 +4,6 @@ const isPlainObj = require('is-plain-obj');
 const HttpAgent = require('agentkeepalive');
 const HttpsAgent = HttpAgent.HttpsAgent;
 
-
 let _activity = null;
 
 function api(path, opts) {
@@ -14,8 +13,7 @@ function api(path, opts) {
   opts = Object.assign({
     json: true,
     token: _activity.Context.connector.token,
-    endpoint: 'https://api.dropboxapi.com',
-    body: { "path": "" },
+    endpoint: 'https://api.dropboxapi.com/2',
     method: 'POST',
     agent: {
       http: new HttpAgent(),
@@ -38,25 +36,10 @@ function api(path, opts) {
   }
 
   return got(url, opts).catch(err => {
-
     throw err;
   });
 }
-// convert response from /issues endpoint to 
-api.convertResponse = function (response) {
-  let items = [];
-  let entries = response.body.entries;
 
-  // iterate through each issue and extract id, title, etc. into a new array
-
-  for (let i = 0; i < entries.length; i++) {
-    let raw = entries[i];
-    let item = { id: raw.id, title: raw.name, description: raw.path_display, link: 'https://www.dropbox.com/home/' + raw.name, raw: raw }
-    items.push(item);
-  }
-
-  return { items: items };
-}
 const helpers = [
   'get',
   'post',
