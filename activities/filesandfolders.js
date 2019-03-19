@@ -8,17 +8,37 @@ module.exports = async function (activity) {
   try {
     api.initialize(activity);
 
-    let requestOptions={
-      body: { "path": "" }
-    };
-    const response = await api('/files/list_folder', requestOptions);
+    let pagination = cfActivity.pagination(activity);
+
+    let requestOptions = null;
+    let continueUrl = '';
+    if (pagination.nextpage) {
+      continueUrl = '/continue';
+      requestOptions = {
+        body: {
+          "cursor": pagination.nextpage
+        }
+      };
+    } else {
+      requestOptions = {
+        body: {
+          "path": "",
+          "limit": pagination.pageSize
+        }
+      };
+    }
+
+    const response = await api(`/files/list_folder${continueUrl}`, requestOptions);
 
     if (!cfActivity.isResponseOk(activity, response)) {
       return;
     }
 
-    // convert response to items[]
     activity.Response.Data = convertResponse(response);
+
+    if (response.body.has_more == true) {
+      activity.Response.Data._nextpage = response.body.cursor;
+    }
   } catch (error) {
 
     cfActivity.handleError(activity, error);
@@ -26,15 +46,19 @@ module.exports = async function (activity) {
 };
 
 //**maps response data*/
-function convertResponse (response) {
+function convertResponse(response) {
   let items = [];
   let entries = response.body.entries;
 
-  // iterate through each issue and extract id, title, etc. into a new array
-
   for (let i = 0; i < entries.length; i++) {
     let raw = entries[i];
-    let item = { id: raw.id, title: raw.name, description: raw.path_display, link: 'https://www.dropbox.com/home/' + raw.name, raw: raw }
+    let item = {
+      id: raw.id,
+      title: raw.name,
+      description: raw.path_display,
+      link: 'https://www.dropbox.com/home' + raw.path_display,
+      raw: raw
+    }
     items.push(item);
   }
 
