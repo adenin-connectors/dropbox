@@ -1,13 +1,9 @@
 'use strict';
 const api = require('./common/api');
-const logger = require('@adenin/cf-logger');
-const cfActivity = require('@adenin/cf-activity');
 
 module.exports = async (activity) => {
   try {
-    api.initialize(activity);
-
-    var pagination = cfActivity.pagination(activity);
+    var pagination = Activity.pagination();
     let pageSize = parseInt(pagination.pageSize);
     let offset = (parseInt(pagination.page) - 1) * pageSize;
 
@@ -22,12 +18,11 @@ module.exports = async (activity) => {
 
     const response = await api(`/files/search`, requestOptions);
 
-    if (!cfActivity.isResponseOk(activity, response)) {
-      return;
-    }
+    if (Activity.isErrorResponse(response)) return;
+
     activity.Response.Data = convertResponse(response);
   } catch (error) {
-    cfActivity.handleError(error, activity);
+    Activity.handleError(error);
   }
 };
 
