@@ -9,7 +9,7 @@ module.exports = async (activity) => {
       success: response && response.statusCode === 200
     };
   } catch (error) {
-    Activity.handleError(error);
+    $.handleError(activity, error);
     activity.Response.Data.success = false;
   }
 };

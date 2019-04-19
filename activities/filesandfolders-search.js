@@ -3,7 +3,7 @@ const api = require('./common/api');
 
 module.exports = async (activity) => {
   try {
-    var pagination = Activity.pagination();
+    var pagination = $.pagination(activity);
     let pageSize = parseInt(pagination.pageSize);
     let offset = (parseInt(pagination.page) - 1) * pageSize;
 
@@ -16,13 +16,14 @@ module.exports = async (activity) => {
       }
     };
 
+    api.initialize(activity);
     const response = await api(`/files/search`, requestOptions);
 
-    if (Activity.isErrorResponse(response)) return;
+    if ($.isErrorResponse(activity, response)) return;
 
     activity.Response.Data = convertResponse(response);
   } catch (error) {
-    Activity.handleError(error);
+    $.handleError(activity, error);
   }
 };
 
