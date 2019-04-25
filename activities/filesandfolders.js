@@ -3,7 +3,7 @@ const api = require('./common/api');
 
 module.exports = async function (activity) {
   try {
-    let pagination = Activity.pagination();
+    let pagination = $.pagination(activity);
 
     let requestOptions = null;
     let continueUrl = '';
@@ -22,10 +22,9 @@ module.exports = async function (activity) {
         }
       };
     }
-
+    api.initialize(activity);
     const response = await api(`/files/list_folder${continueUrl}`, requestOptions);
-
-    if (Activity.isErrorResponse(response)) return;
+    if ($.isErrorResponse(activity, response)) return;
 
     activity.Response.Data = convertResponse(response);
 
@@ -33,7 +32,7 @@ module.exports = async function (activity) {
       activity.Response.Data._nextpage = response.body.cursor;
     }
   } catch (error) {
-    Activity.handleError(error);
+    $.handleError(activity, error);
   }
 };
 
